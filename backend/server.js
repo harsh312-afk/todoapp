@@ -1,99 +1,44 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
 require('dotenv').config();
+const http = require('http');
+const app = require('./src/app');
+const { connectDB, disconnectDB } = require('./src/config/db');
 
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+async function startServer() {
+  // Attempt database connection (falls back smoothly if MongoDB is not running locally)
+  await connectDB();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fullstackdb', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log('MongoDB connection error:', err));
+  const server = http.createServer(app);
 
-// Sample route
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Full Stack API' });
-});
-
-// Sample Todo model and routes (for demonstration)
-const todoSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
-  completed: {
-    type: Boolean,
-    default: false
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-const Todo = mongoose.model('Todo', todoSchema);
-
-// Get all todos
-app.get('/api/todos', async (req, res) => {
-  try {
-    const todos = await Todo.find();
-    res.json(todos);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Create a new todo
-app.post('/api/todos', async (req, res) => {
-  const todo = new Todo({
-    title: req.body.title
+  server.listen(PORT, () => {
+    console.log(`[Server] Todo API server running on http://localhost:${PORT}`);
+    console.log(`[Server] Health check available at http://localhost:${PORT}/api/health`);
+    console.log(`[Server] Todos API available at http://localhost:${PORT}/api/todos`);
   });
 
-  try {
-    const newTodo = await todo.save();
-    res.status(201).json(newTodo);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+  // Graceful shutdown handling
+  const gracefulShutdown = async (signal) => {
+    console.log(`\n[Server] Received ${signal}. Shutting down gracefully...`);
+    server.close(async () => {
+      console.log('[Server] HTTP server closed.');
+      await disconnectDB();
+      console.log('[Server] Database connection closed. Exit clean.');
+      process.exit(0);
+    });
 
-// Update a todo
-app.patch('/api/todos/:id', async (req, res) => {
-  try {
-    const todo = await Todo.findById(req.params.id);
-    if (!todo) return res.status(404).json({ message: 'Todo not found' });
+    // Force exit if not closed within 10 seconds
+    setTimeout(() => {
+      console.error('[Server] Forcing shutdown after timeout.');
+      process.exit(1);
+    }, 10000).unref();
+  };
 
-    if (req.body.title != null) todo.title = req.body.title;
-    if (req.body.completed != null) todo.completed = req.body.completed;
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+}
 
-    const updatedTodo = await todo.save();
-    res.json(updatedTodo);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-// Delete a todo
-app.delete('/api/todos/:id', async (req, res) => {
-  try {
-    const todo = await Todo.findById(req.params.id);
-    if (!todo) return res.status(404).json({ message: 'Todo not found' });
-
-    await todo.remove();
-    res.json({ message: 'Todo deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+startServer().catch(err => {
+  console.error('[Server] Fatal startup error:', err);
+  process.exit(1);
 });
