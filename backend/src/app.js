@@ -54,6 +54,8 @@ app.get('/', (req, res) => {
 // Mount Routes
 app.use('/api', healthRoutes);
 app.use('/api/todos', todoRoutes);
+app.use('/todos', todoRoutes);
+app.use('/', healthRoutes);
 
 // 404 & Global Error Handling
 app.use(notFoundHandler);

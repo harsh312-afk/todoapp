@@ -10,11 +10,19 @@
     "test:backend": "cd backend && npm test",
     "test:frontend": "cd frontend && npm test -- --watchAll=false",
     "test": "npm run test:backend && npm run test:frontend",
-    "build:frontend": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm install && npm run build",
     "build": "npm run build:frontend",
     "install:backend": "cd backend && npm install",
     "install:frontend": "cd frontend && npm install",
     "install:all": "npm install && npm run install:backend && npm run install:frontend"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "mongoose": "^9.9.3"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
