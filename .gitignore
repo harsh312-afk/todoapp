@@ -31,3 +31,5 @@ Thumbs.db
 # Misc
 coverage/
 nyc-output/
+.vercel
+.env*

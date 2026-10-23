@@ -1,9 +1,13 @@
 # TaskFlow — Modern Full-Stack Todo Application
 
+[![Deployment](https://img.shields.io/badge/Vercel-Live_Deployment-black?logo=vercel)](https://todoapp-nine-dun.vercel.app)
 [![CI](https://github.com/harsh312-afk/todoapp/actions/workflows/ci.yml/badge.svg)](https://github.com/harsh312-afk/todoapp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-A modern, production-ready, fully accessible full-stack task management application built with Node.js, Express, MongoDB (with resilient in-memory fallback), and React.
+> 🌐 **Live URL**: [https://todoapp-nine-dun.vercel.app](https://todoapp-nine-dun.vercel.app)  
+> 🔌 **Live API**: [https://todoapp-nine-dun.vercel.app/api/health](https://todoapp-nine-dun.vercel.app/api/health)
+
+A modern, production-ready, fully accessible full-stack task management application built with Node.js, Express, MongoDB (with resilient in-memory fallback), and React. Hosted on Vercel as a unified SPA and Serverless Functions stack.
 
 ---
 
